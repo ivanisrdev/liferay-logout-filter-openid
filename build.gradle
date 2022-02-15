@@ -1,0 +1,28 @@
+allprojects {
+
+    apply plugin: "java"
+
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+
+}
+
+subprojects {
+    configurations {
+        liferayCssBuilder
+        liferayReleaseApi
+    }
+
+    dependencies {
+        liferayCssBuilder "com.liferay:com.liferay.css.builder:$liferayCssBuilderVersion"
+        liferayReleaseApi "com.liferay.portal:release.dxp.api:$liferayReleaseApiVersion"
+    }
+
+    repositories {
+
+        maven {
+            url "https://repository.liferay.com/nexus/content/groups/public"
+        }
+    }
+
+}
