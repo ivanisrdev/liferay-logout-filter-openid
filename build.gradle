@@ -11,6 +11,7 @@ subprojects {
     configurations {
         liferayCssBuilder
         liferayReleaseApi
+        projectLombok
     }
 
     dependencies {
