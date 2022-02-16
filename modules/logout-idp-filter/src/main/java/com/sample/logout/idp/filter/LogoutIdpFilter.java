@@ -4,13 +4,9 @@ import com.liferay.portal.configuration.metatype.bnd.util.ConfigurableUtil;
 import com.liferay.portal.kernel.events.ActionException;
 import com.liferay.portal.kernel.events.LifecycleAction;
 import com.liferay.portal.kernel.events.LifecycleEvent;
-import com.liferay.portal.kernel.json.JSONFactoryUtil;
-import com.liferay.portal.kernel.json.JSONObject;
 import com.liferay.portal.kernel.log.Log;
 import com.liferay.portal.kernel.log.LogFactoryUtil;
 import com.liferay.portal.kernel.util.*;
-import com.liferay.portal.security.sso.openid.connect.OpenIdConnectProvider;
-import com.liferay.portal.security.sso.openid.connect.OpenIdConnectProviderRegistry;
 import com.sample.logout.idp.filter.config.LogoutIdpFilterConfiguration;
 import com.sample.logout.idp.filter.constants.LogoutIdpFilterKeys;
 import org.osgi.service.component.annotations.*;
@@ -33,9 +29,6 @@ public class LogoutIdpFilter implements LifecycleAction {
     @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
     private volatile PrefsProps _prefsProps;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, policyOption = ReferencePolicyOption.GREEDY)
-    private volatile OpenIdConnectProviderRegistry _openIdConnectProviderRegistry;
-
     private static final Log _log = LogFactoryUtil.getLog(LogoutIdpFilter.class);
     private volatile LogoutIdpFilterConfiguration _configuration;
 
@@ -46,26 +39,9 @@ public class LogoutIdpFilter implements LifecycleAction {
             HttpServletRequest request = lifecycleEvent.getRequest();
             HttpServletResponse response = lifecycleEvent.getResponse();
 
-            //Get OpenId provider specified in the OSGI system configuration
-            String openIdConnectProviderName = String.valueOf(_openIdConnectProviderRegistry.getOpenIdConnectProviderNames()
-                    .stream()
-                    .filter(openIdConnectProviderName1 -> _openIdConnectProviderRegistry.getOpenIdConnectProviderNames().contains(_configuration.idpName()))
-                    .findAny()
-                    .orElse(null));
-
-            if (openIdConnectProviderName == null || openIdConnectProviderName.isEmpty()) {
-                _log.warn("No OpenID Connect Providers found.");
-                return;
-            }
-
-            OpenIdConnectProvider openIdConnectProvider = _openIdConnectProviderRegistry.getOpenIdConnectProvider(openIdConnectProviderName);
-
-            Object providerMetadata = openIdConnectProvider.getOIDCProviderMetadata();
-            JSONObject jsonObject = JSONFactoryUtil.createJSONObject(providerMetadata.toString());
-            Object authEndpoint = jsonObject.get(LogoutIdpFilterKeys.PARAM_AUTH_ENDPOINT);
-            String logoutEndpoint = StringUtil.replaceLast(authEndpoint.toString(), LogoutIdpFilterKeys.PARAM_AUTH, LogoutIdpFilterKeys.PARAM_LOGOUT);
             String redirectUri = getRedirectUrl(request);
-            String logoutUrl = logoutEndpoint + LogoutIdpFilterKeys.REDIRECT_URI + redirectUri;
+            String logoutUrl = _configuration.logoutUrl() + LogoutIdpFilterKeys.REDIRECT_URI + redirectUri;
+
             response.sendRedirect(logoutUrl);
 
         } catch (Exception exception) {
