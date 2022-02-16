@@ -20,9 +20,9 @@ import com.sample.logout.idp.filter.constants.LogoutIdpFilterKeys;
 public interface LogoutIdpFilterConfiguration {
 
     @Meta.AD(
-            deflt = "Keycloak",
+            deflt = "http://localhost:8088/auth/realms/master/protocol/openid-connect/logout",
             required = false
     )
-    String idpName();
+    String logoutUrl();
 
 }
