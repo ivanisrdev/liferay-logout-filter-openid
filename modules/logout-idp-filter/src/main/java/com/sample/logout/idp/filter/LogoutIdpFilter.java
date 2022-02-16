@@ -38,7 +38,6 @@ public class LogoutIdpFilter implements LifecycleAction {
         try {
             HttpServletRequest request = lifecycleEvent.getRequest();
             HttpServletResponse response = lifecycleEvent.getResponse();
-
             String redirectUri = getRedirectUrl(request);
             String logoutUrl = _configuration.logoutUrl() + LogoutIdpFilterKeys.REDIRECT_URI + redirectUri;
 
